@@ -58,3 +58,6 @@ athena-results/
 tmp/
 temp/
 *.tmp
+*.zip
+src/lambda/faker*
+src/lambda/bin/
