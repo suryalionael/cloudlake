@@ -28,7 +28,7 @@ final as (
         p.subcategory,
         p.current_price,
         p.margin_percent,
-        coalesceps.order_count, 0) as order_count,
+        coalesce(ps.order_count, 0) as order_count,
         coalesce(ps.total_units_sold, 0) as total_units_sold,
         coalesce(ps.total_revenue, 0) as total_revenue,
         ps.avg_selling_price,
