@@ -1,0 +1,160 @@
+sources:
+  - name: processed
+    description: "Raw processed data from Glue ETL jobs"
+    database: "{{ env_var('DBT_CATALOG', 'cloudlake') }}"
+    schema: "{{ env_var('DBT_SCHEMA', 'processed') }}"
+    loader: "aws_glue"
+    freshness:
+      warn_after:
+        count: 26
+        period: hour
+      error_after:
+        count: 48
+        period: hour
+    loaded_at_field: "_loaded_at"
+    tables:
+      - name: customers
+        description: "Customer dimension data"
+        columns:
+          - name: customer_id
+            description: "Unique customer identifier"
+            data_tests:
+              - unique
+              - not_null
+          - name: email
+            description: "Customer email address"
+            data_tests:
+              - not_null
+              - unique
+          - name: first_name
+            data_tests:
+              - not_null
+          - name: last_name
+            data_tests:
+              - not_null
+          - name: country
+            description: "Country code (US, CA, UK, AU)"
+            data_tests:
+              - not_null
+              - accepted_values:
+                  values: ['US', 'CA', 'UK', 'AU']
+          - name: created_at
+            data_tests:
+              - not_null
+          - name: updated_at
+            data_tests:
+              - not_null
+
+      - name: products
+        description: "Product catalog data"
+        columns:
+          - name: product_id
+            description: "Unique product identifier"
+            data_tests:
+              - unique
+              - not_null
+          - name: name
+            data_tests:
+              - not_null
+          - name: category
+            data_tests:
+              - not_null
+          - name: price
+            description: "Current product price"
+            data_tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: "> 0"
+          - name: cost
+            description: "Product cost"
+          - name: created_at
+            data_tests:
+              - not_null
+          - name: updated_at
+            data_tests:
+              - not_null
+
+      - name: stores
+        description: "Store location data"
+        columns:
+          - name: store_id
+            description: "Unique store identifier"
+            data_tests:
+              - unique
+              - not_null
+          - name: store_name
+            data_tests:
+              - not_null
+          - name: city
+            data_tests:
+              - not_null
+          - name: state
+            data_tests:
+              - not_null
+          - name: country
+            data_tests:
+              - not_null
+              - accepted_values:
+                  values: ['US', 'CA']
+          - name: opened_at
+            data_tests:
+              - not_null
+
+      - name: orders
+        description: "Order transaction data"
+        columns:
+          - name: order_id
+            description: "Unique order identifier"
+            data_tests:
+              - unique
+              - not_null
+          - name: customer_id
+            description: "Foreign key to customers"
+            data_tests:
+              - not_null
+          - name: order_date
+            data_tests:
+              - not_null
+          - name: status
+            description: "Order status (complete, pending, cancelled)"
+            data_tests:
+              - not_null
+              - accepted_values:
+                  values: ['complete', 'pending', 'cancelled']
+          - name: total_amount
+            data_tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: ">= 0"
+
+      - name: order_items
+        description: "Individual items within orders"
+        columns:
+          - name: order_item_id
+            description: "Unique line item identifier"
+            data_tests:
+              - unique
+              - not_null
+          - name: order_id
+            description: "Foreign key to orders"
+            data_tests:
+              - not_null
+          - name: product_id
+            description: "Foreign key to products"
+            data_tests:
+              - not_null
+          - name: quantity
+            data_tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: "> 0"
+          - name: unit_price
+            data_tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: "> 0"
+          - name: line_total
+            data_tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: ">= 0"

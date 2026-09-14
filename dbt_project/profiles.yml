@@ -1,0 +1,7 @@
+dbt_cloudlake:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: 'cloudlake.duckdb'
+      threads: 4

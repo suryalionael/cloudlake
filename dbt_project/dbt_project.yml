@@ -1,0 +1,36 @@
+name: 'dbt_cloudlake'
+version: '1.0.0'
+config-version: 2
+
+profile: 'dbt_cloudlake'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+  - "dbt_modules"
+
+models:
+  dbt_cloudlake:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: ephemeral
+    quotes:
+      +materialized: table
+      +schema: analytics
+    +persist_docs:
+      relation: true
+      columns: true
+
+vars:
+  stock_data_start_date: '2023-01-01'
+  stock_data_end_date: '2023-12-31'
